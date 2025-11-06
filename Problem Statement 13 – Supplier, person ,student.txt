@@ -1,0 +1,159 @@
+Problem Statement 13 – Complete Solution with Data Insertion
+
+Databases:
+1. Supplier, Parts, Catalog
+2. Person, Company, Manages
+3. Student, Subject, Marks
+*/
+
+-- ----------- DATABASE 1: Supplier, Parts, Catalog -----------
+CREATE DATABASE ak;
+USE ak;
+
+-- Create Tables
+CREATE TABLE Supplier (
+    Sid INT PRIMARY KEY,
+    Sname VARCHAR(50),
+    address VARCHAR(100)
+);
+
+CREATE TABLE Parts (
+    Pid INT PRIMARY KEY,
+    Pname VARCHAR(50),
+    Color VARCHAR(20)
+);
+
+CREATE TABLE Catalog (
+    Sid INT,
+    Pid INT,
+    cost DECIMAL(10,2),
+    FOREIGN KEY (Sid) REFERENCES Supplier(Sid),
+    FOREIGN KEY (Pid) REFERENCES Parts(Pid)
+);
+
+-- Insert Sample Data
+INSERT INTO Supplier VALUES (1, 'ABC Suppliers', 'Pune');
+INSERT INTO Supplier VALUES (2, 'XYZ Traders', 'Mumbai');
+INSERT INTO Supplier VALUES (3, 'Tech Parts', 'Delhi');
+
+INSERT INTO Parts VALUES (101, 'Bolt', 'Green');
+INSERT INTO Parts VALUES (102, 'Nut', 'Red');
+INSERT INTO Parts VALUES (103, 'Screw', 'Blue');
+INSERT INTO Parts VALUES (104, 'Washer', 'Red');
+
+INSERT INTO Catalog VALUES (1, 101, 20.50);
+INSERT INTO Catalog VALUES (1, 102, 30.00);
+INSERT INTO Catalog VALUES (2, 103, 15.00);
+INSERT INTO Catalog VALUES (3, 104, 45.00);
+
+-- Queries
+-- Q1: Find name of all parts whose color is green.
+SELECT Pname FROM Parts WHERE Color = 'Green';
+
+-- Q2: Find names of suppliers who supply some red parts.
+SELECT DISTINCT S.Sname
+FROM Supplier S
+JOIN Catalog C ON S.Sid = C.Sid
+JOIN Parts P ON C.Pid = P.Pid
+WHERE P.Color = 'Red';
+
+-- Q3: Find names of all parts whose cost is more than Rs. 25.
+SELECT DISTINCT P.Pname
+FROM Parts P
+JOIN Catalog C ON P.Pid = C.Pid
+WHERE C.cost > 25;
+
+
+-- ----------- DATABASE 2: Person, Company, Manages -----------
+
+-- Create Tables
+CREATE TABLE Person (
+    pname VARCHAR(50) PRIMARY KEY,
+    street VARCHAR(100),
+    city VARCHAR(50),
+    salary DECIMAL(10,2)
+);
+
+CREATE TABLE Company (
+    cname VARCHAR(50) PRIMARY KEY,
+    city VARCHAR(50)
+);
+
+CREATE TABLE Manages (
+    pname VARCHAR(50),
+    cname VARCHAR(50),
+    FOREIGN KEY (pname) REFERENCES Person(pname),
+    FOREIGN KEY (cname) REFERENCES Company(cname)
+);
+
+-- Insert Sample Data
+INSERT INTO Person VALUES ('Rahul', 'FC Road', 'Pune', 5000);
+INSERT INTO Person VALUES ('Sneha', 'MG Road', 'Pune', 2800);
+INSERT INTO Person VALUES ('Amit', 'JM Road', 'Mumbai', 6000);
+
+INSERT INTO Company VALUES ('Idea', 'Pune');
+INSERT INTO Company VALUES ('Infosys', 'Bangalore');
+
+INSERT INTO Manages VALUES ('Rahul', 'Idea');
+INSERT INTO Manages VALUES ('Sneha', 'Idea');
+INSERT INTO Manages VALUES ('Amit', 'Infosys');
+
+-- Query
+-- Q4: Find street & city of employees who work for “Idea”, live in Pune & earn more than 3000.
+SELECT P.street, P.city
+FROM Person P
+JOIN Manages M ON P.pname = M.pname
+JOIN Company C ON M.cname = C.cname
+WHERE C.cname = 'Idea' AND P.city = 'Pune' AND P.salary > 3000;
+
+
+-- ----------- DATABASE 3: Student, Subject, Marks -----------
+
+-- Create Tables
+CREATE TABLE Student (
+    Rollno INT PRIMARY KEY,
+    name VARCHAR(50),
+    address VARCHAR(100)
+);
+
+CREATE TABLE Subject (
+    sub_code VARCHAR(10) PRIMARY KEY,
+    sub_name VARCHAR(50)
+);
+
+CREATE TABLE Marks (
+    Rollno INT,
+    sub_code VARCHAR(10),
+    marks INT,
+    FOREIGN KEY (Rollno) REFERENCES Student(Rollno),
+    FOREIGN KEY (sub_code) REFERENCES Subject(sub_code)
+);
+
+-- Insert Sample Data
+INSERT INTO Student VALUES (1, 'Rohan', 'Pune');
+INSERT INTO Student VALUES (2, 'Priya', 'Mumbai');
+INSERT INTO Student VALUES (3, 'Kunal', 'Delhi');
+
+INSERT INTO Subject VALUES ('S1', 'DBMS');
+INSERT INTO Subject VALUES ('S2', 'OS');
+INSERT INTO Subject VALUES ('S3', 'CN');
+
+INSERT INTO Marks VALUES (1, 'S1', 55);
+INSERT INTO Marks VALUES (1, 'S2', 65);
+INSERT INTO Marks VALUES (2, 'S1', 35);
+INSERT INTO Marks VALUES (2, 'S3', 75);
+INSERT INTO Marks VALUES (3, 'S1', 28);
+INSERT INTO Marks VALUES (3, 'S2', 80);
+
+-- Queries
+-- Q5: Find average marks of each student along with name of student.
+SELECT S.name, AVG(M.marks) AS average_marks
+FROM Student S
+JOIN Marks M ON S.Rollno = M.Rollno
+GROUP BY S.name;
+
+-- Q6: Find how many students failed in the subject “DBMS” (Assume passing < 40).
+SELECT COUNT(*) AS failed_students
+FROM Marks M
+JOIN Subject S ON M.sub_code = S.sub_code
+WHERE S.sub_name = 'DBMS' AND M.marks < 40;

@@ -1,0 +1,106 @@
+Problem statement 12. 
+
+Consider each document in the zipcode collection has the following form:
+{
+"_id": "10280",
+"city": "NEW YORK",
+"state": "NY",
+"pop": 5574,
+}
+1.	Return States with Populations above 1 Lakh.
+2.	Create a single-field index on the city field.
+3.	Create a compound index on the state and city fields.
+4.	Find the total population for each state.
+5.	Find the average population per city within each state.
+6.	List the states having total population greater than 20,000.
+7.	Retrieve all cities in California (state = 'CA') with a population greater than 10,000.
+
+
+*/
+// ✅ 1. Select / Create Database
+
+use zipcodeDB;
+
+// ✅ 2. Create Collection & Insert Sample Data (You can skip if already inserted)
+db.zipcode.insertMany
+
+([
+  { "_id": "10280", "city": "NEW YORK", "state": "NY", "pop": 5574 },
+  { "_id": "90001", "city": "LOS ANGELES", "state": "CA", "pop": 15000 },
+  { "_id": "94105", "city": "SAN FRANCISCO", "state": "CA", "pop": 22000 },
+  { "_id": "60601", "city": "CHICAGO", "state": "IL", "pop": 30000 },
+  { "_id": "73301", "city": "AUSTIN", "state": "TX", "pop": 75000 },
+  { "_id": "73344", "city": "AUSTIN", "state": "TX", "pop": 30000 },
+  { "_id": "10001", "city": "NEW YORK", "state": "NY", "pop": 85000 },
+  { "_id": "99501", "city": "ANCHORAGE", "state": "AK", "pop": 35000 }
+]);
+
+// ✅ 3. Return States with Total Population Above 1 Lakh (100,000)
+db.zipcode.aggregate
+
+([
+  { $group: { _id: "$state", total_population: { $sum: "$pop" } } },
+  { $match: { total_population: { $gt: 100000 } } }
+]);
+
+// ✅ 4. Create a Single-Field Index on "city"
+
+
+db.zipcode.createIndex({ city: 1 });
+
+
+// ✅ 5. Create a Compound Index on "state" and "city"
+
+
+db.zipcode.createIndex({ state: 1, city: 1 });
+
+// ✅ 6. Find Total Population for Each State
+db.zipcode.aggregate
+
+([
+  { $group: { _id: "$state", total_population: { $sum: "$pop" } } },
+  { $sort: { total_population: -1 } }   // Descending order
+]);
+
+
+// ✅ 7. Find Average Population per City within Each State
+
+db.zipcode.aggregate([
+  { 
+    $group: { 
+      _id: { state: "$state", city: "$city" }, 
+      avg_population: { $avg: "$pop" } 
+    }
+  },
+  { $sort: { "_id.state": 1, "_id.city": 1 } }
+]);
+
+// ✅ 8. List States Having Total Population Greater than 20,000
+
+db.zipcode.aggregate([
+  { $group: { _id: "$state", total_population: { $sum: "$pop" } } },
+  { $match: { total_population: { $gt: 20000 } } },
+  { $sort: { total_population: -1 } }
+]);
+
+// ✅ 9. Retrieve All Cities in California (state='CA') with Population > 10,000
+
+db.zipcode.find({
+  state: "CA",
+  pop: { $gt: 10000 }
+}).sort({ city: 1 });
+
+ ✅
+
+db.zipcode.find();
+
+
+
+
+🧠 Theory: MongoDB – Zipcode Database
+
+MongoDB is a NoSQL, document-oriented database that stores data in the form of BSON (Binary JSON) documents instead of traditional rows and tables. It provides powerful tools for data aggregation, indexing, and querying large datasets efficiently.
+
+Conclusion
+
+This experiment demonstrates how MongoDB’s aggregation pipeline and indexing mechanisms can be used to efficiently analyze large sets of demographic data. It highlights the advantages of MongoDB’s flexible schema, fast querying, and real-time data analysis capabilities compared to traditional relational databases.

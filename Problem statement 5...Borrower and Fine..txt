@@ -63,6 +63,11 @@ BEGIN
     DECLARE v_days INT;
     DECLARE v_fine DECIMAL(10,2) DEFAULT 0;
     DECLARE v_exists INT DEFAULT 0;
+    
+    -- Constants for fine calculation
+    DECLARE C_FINE_RATE_LOW DECIMAL(10,2) DEFAULT 5.00;
+    DECLARE C_FINE_RATE_HIGH DECIMAL(10,2) DEFAULT 50.00;
+    DECLARE C_DAYS_THRESHOLD INT DEFAULT 30;
 
     -- Exception handler for record not found
     DECLARE CONTINUE HANDLER FOR NOT FOUND
@@ -74,7 +79,7 @@ BEGIN
     WHERE Roll_no = p_roll AND NameofBook = p_book;
 
     IF v_exists = 0 THEN
-        SELECT '❌ No such borrower or book found.' AS Message;
+        SELECT 'No such borrower or book found.' AS Message;
     ELSE
         -- Get issue date
         SELECT DateofIssue INTO v_dateofissue
@@ -84,12 +89,20 @@ BEGIN
         -- Calculate no. of days
         SET v_days = DATEDIFF(CURDATE(), v_dateofissue);
 
-        -- Fine calculation
-        IF v_days BETWEEN 15 AND 30 THEN
-            SET v_fine = v_days * 5;
-        ELSEIF v_days > 30 THEN
-            SET v_fine = v_days * 50;
+        -- Fine calculation based on problem statement rules
+        IF v_days BETWEEN 15 AND C_DAYS_THRESHOLD THEN
+            -- Days 15 to 30: Rs 5 per day
+            SET v_fine = v_days * C_FINE_RATE_LOW;
+        
+        ELSEIF v_days > C_DAYS_THRESHOLD THEN
+            -- Days > 30: Rs 5 per day for the first 30 days 
+            -- and Rs 50 per day for days exceeding 30
+            
+            SET v_fine = (C_DAYS_THRESHOLD * C_FINE_RATE_LOW) + -- Fine for the first 30 days
+                         ((v_days - C_DAYS_THRESHOLD) * C_FINE_RATE_HIGH); -- Fine for days > 30
+        
         ELSE
+            -- Days < 15: No fine
             SET v_fine = 0;
         END IF;
 
@@ -106,7 +119,7 @@ BEGIN
 
         -- Final output
         SELECT 
-            '✅ Book Returned Successfully!' AS Message,
+            'Book Returned Successfully!' AS Message,
             CONCAT('Days Borrowed: ', v_days) AS Days,
             CONCAT('Fine Amount: Rs. ', v_fine) AS Fine;
     END IF;
