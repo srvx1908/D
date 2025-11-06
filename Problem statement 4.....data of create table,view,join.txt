@@ -1,0 +1,165 @@
+Problem statement 4. 
+
+a)	Create following Tables with suitable data and solve following query
+ 		cust_mstr(custno,fname,lname)
+ 		acc_fd_cust_dets(codeno,acc_fd_no)
+ 		fd_dets(fd_sr_no,amt)	
+List the customer holding fixed deposit of amount more than 5000 
+
+b)	Create view on cust_mstr and acc_fd_cust_dets tables by selecting any one column   
+from each table perform insert update delete operations
+
+c)	Create following Tables with suitable data and solve following query
+emp_mstr(emp_no,f_name,l_name,m_name,dept)
+cntc_dets(code_no,cntc_type,cntc_data)
+List the employee details along with contact details using left outer join & right join 
+
+
+
+
+
+
+a)	Create following Tables with suitable data and solve following query
+
+
+CREATE TABLE cust_mstr (
+    custno INT PRIMARY KEY,
+    fname VARCHAR(50),
+    lname VARCHAR(50)
+);
+
+CREATE TABLE acc_fd_cust_dets (
+    codeno INT PRIMARY KEY,
+    acc_fd_no INT
+);
+
+CREATE TABLE fd_dets (
+    fd_sr_no INT PRIMARY KEY,
+    amt DECIMAL(10,2)
+);
+
+
+
+
+
+INSERT VALUE
+
+
+
+INSERT INTO cust_mstr VALUES
+(1, 'Ravi', 'Patil'),
+(2, 'Sneha', 'Kale'),
+(3, 'Amit', 'Joshi'),
+(4, 'Pooja', 'Deshmukh');
+
+INSERT INTO acc_fd_cust_dets VALUES
+(1, 101),
+(2, 102),
+(3, 103),
+(4, 104);
+
+INSERT INTO fd_dets VALUES
+(101, 4500.00),
+(102, 12000.00),
+(103, 8000.00),
+(104, 3000.00);
+
+
+
+
+CUSTOMER HOLDING FD > 5000.....(List the customer holding fixed deposit of amount more than 5000 )
+
+
+SELECT c.custno, c.fname, c.lname, f.amt
+FROM cust_mstr c
+JOIN acc_fd_cust_dets a ON c.custno = a.codeno
+JOIN fd_dets f ON a.acc_fd_no = f.fd_sr_no
+WHERE f.amt > 5000;
+
+
+
+
+b)	Create view on cust_mstr and acc_fd_cust_dets tables by selecting any one column   
+from each table perform insert update delete operations
+
+
+CREATE VIEW cust_acc AS
+SELECT c.custno, a.acc_fd_no
+FROM cust_mstr c
+JOIN acc_fd_cust_dets a ON c.custno = a.codeno;
+
+INSERT 
+
+INSERT INTO cust_mstr VALUES (5, 'Rohit', 'Sharma');
+INSERT INTO acc_fd_cust_dets VALUES (5, 105);
+
+UPDATE
+
+UPDATE acc_fd_cust_dets
+SET acc_fd_no = 202
+WHERE codeno = 2;
+
+DELETE
+
+DELETE FROM acc_fd_cust_dets WHERE codeno = 3;
+DELETE FROM cust_mstr WHERE custno = 3;
+
+
+
+
+c)	Create following Tables with suitable data and solve following query
+               emp_mstr(emp_no,f_name,l_name,m_name,dept)
+               cntc_dets(code_no,cntc_type,cntc_data)
+
+List the employee details along with contact details using left outer join & right join
+
+
+
+CREATE TABLE
+
+CREATE TABLE emp_mstr (
+    emp_no INT PRIMARY KEY,
+    f_name VARCHAR(50),
+    l_name VARCHAR(50),
+    m_name VARCHAR(50),
+    dept VARCHAR(50)
+);
+
+CREATE TABLE cntc_dets (
+    code_no INT,
+    cntc_type VARCHAR(20),
+    cntc_data VARCHAR(100)
+);
+
+
+INSERT DATA
+
+INSERT INTO emp_mstr VALUES
+(1, 'Ravi', 'Patil', 'S.', 'IT'),
+(2, 'Sneha', 'Kale', 'A.', 'HR'),
+(3, 'Amit', 'Joshi', 'M.', 'Finance'),
+(4, 'Pooja', 'Deshmukh', 'R.', 'Sales');
+
+INSERT INTO cntc_dets VALUES
+(1, 'Email', 'ravi@gmail.com'),
+(1, 'Phone', '9876543210'),
+(2, 'Email', 'sneha@yahoo.com'),
+(5, 'Phone', '9998887777');  -- No matching employee
+
+
+
+LEFT OUTER JOIN
+
+SELECT e.emp_no, e.f_name, e.l_name, e.dept, c.cntc_type, c.cntc_data
+FROM emp_mstr e
+LEFT JOIN cntc_dets c ON e.emp_no = c.code_no;
+
+
+
+RIGHT OUTER JOIN
+
+SELECT e.emp_no, e.f_name, e.l_name, e.dept, c.cntc_type, c.cntc_data
+FROM emp_mstr e
+RIGHT JOIN cntc_dets c ON e.emp_no = c.code_no;
+
+

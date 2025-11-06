@@ -1,0 +1,96 @@
+Problem statement 7. 
+
+Write a Stored Procedure namely proc_Grade for the categorization of student. If marks scored by students in examination is <=1500 and marks>=990 then student will be placed in distinction category if marks scored are between 989 and 900 category is first class, if marks 899 and 825 category is Higher Second Class. 
+Write a PL/SQL block to use procedure created with above requirement. 
+Stud_Marks(name, total_marks)        Result(Roll,Name, Class)
+
+
+
+
+1️⃣ Create Tables
+
+CREATE TABLE Stud_Marks (
+    Roll INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Total_Marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT,
+    Name VARCHAR(50),
+    Class VARCHAR(30)
+);
+
+
+2️⃣ Insert Sample Data
+
+INSERT INTO Stud_Marks VALUES (1, 'Ravi', 1200);
+INSERT INTO Stud_Marks VALUES (2, 'Priya', 950);
+INSERT INTO Stud_Marks VALUES (3, 'Suresh', 880);
+INSERT INTO Stud_Marks VALUES (4, 'Anita', 820);
+INSERT INTO Stud_Marks VALUES (5, 'Vikas', 760);
+
+
+
+3️⃣ Create Stored Procedure
+
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_roll INT;
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_total INT;
+    DECLARE v_class VARCHAR(30);
+
+    -- Cursor for student data
+    DECLARE stud_cur CURSOR FOR 
+        SELECT Roll, Name, Total_Marks FROM Stud_Marks;
+
+    -- Exception handler for end of cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Clear previous results
+    DELETE FROM Result;
+
+    OPEN stud_cur;
+    read_loop: LOOP
+        FETCH stud_cur INTO v_roll, v_name, v_total;
+        IF done = 1 THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Determine class
+        IF v_total BETWEEN 990 AND 1500 THEN
+            SET v_class = 'Distinction';
+        ELSEIF v_total BETWEEN 900 AND 989 THEN
+            SET v_class = 'First Class';
+        ELSEIF v_total BETWEEN 825 AND 899 THEN
+            SET v_class = 'Higher Second Class';
+        ELSE
+            SET v_class = 'Pass / Below Second Class';
+        END IF;
+
+        -- Insert result
+        INSERT INTO Result (Roll, Name, Class)
+        VALUES (v_roll, v_name, v_class);
+    END LOOP;
+
+    CLOSE stud_cur;
+END $$
+
+DELIMITER ;
+
+
+
+4️⃣ Execute the Procedure
+
+CALL proc_Grade();
+
+
+
+5️⃣ Display Final Results
+
+SELECT * FROM Result;

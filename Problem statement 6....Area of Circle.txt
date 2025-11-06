@@ -1,0 +1,50 @@
+Problem statement 6.
+
+Write a PL/SQL code block to calculate the area of a circle for a value of radius varying from 1 to 10. Store the radius and the corresponding values of calculated area in an empty table named areas, consisting of two columns, radius and area
+
+
+
+
+
+
+-- 1) Create (or recreate) the table
+
+DROP TABLE IF EXISTS areas;
+
+CREATE TABLE areas (
+  radius INT NOT NULL,
+  area   DECIMAL(10,2) NOT NULL
+);
+
+-- 2) Create procedure to populate the table
+
+DROP PROCEDURE IF EXISTS populate_areas;
+
+DELIMITER $$
+CREATE PROCEDURE populate_areas()
+BEGIN
+  DECLARE r INT DEFAULT 1;
+  DECLARE a DECIMAL(12,6);
+
+  TRUNCATE TABLE areas;
+
+  WHILE r <= 10 DO
+    SET a = PI() * r * r;
+    INSERT INTO areas(radius, area) VALUES (r, ROUND(a,2));
+    SET r = r + 1;
+  END WHILE;
+END$$
+DELIMITER ;
+
+
+
+-- 3) Call the procedure to populate rows
+
+CALL populate_areas();
+
+
+
+
+-- 4) Verify results
+
+SELECT * FROM areas;

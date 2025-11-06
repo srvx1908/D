@@ -1,0 +1,133 @@
+Problem statement 3. 
+
+a)Consider following  database schema and solve given queries
+
+    cust_mstr(cust_no,fname,lname)
+    add_dets(code_no,add1,add2,state,city,pincode)
+
+1.Create above Tables with suitable data
+2.Retrieve the address of customer Fname as 'xyz' and Lname as 'pqr'
+3.Create View on add_dets table by selecting any two columns and perform insert update delete operations
+
+b)Create following Tables
+
+    emp_mstr(e_mpno,f_name,l_name,m_name,dept,desg,branch_no)
+     branch_mstr(name,b_no)
+List the employee details along with branch names to which they belong 
+
+
+
+1.Create above Tables with suitable data
+    
+CREATE TABLE cust_mstr (
+    cust_no INT PRIMARY KEY,
+    fname VARCHAR(50),
+    lname VARCHAR(50)
+);
+
+CREATE TABLE add_dets (
+    code_no INT PRIMARY KEY,
+    add1 VARCHAR(100),
+    add2 VARCHAR(100),
+    state VARCHAR(50),
+    city VARCHAR(50),
+    pincode VARCHAR(10)
+);
+
+
+Insert Suitable Data 
+ 
+
+INSERT INTO cust_mstr VALUES 
+(1, 'Rahul', 'Sharma'),
+(2, 'Amit', 'Patil'),
+(3, 'xyz', 'pqr'),
+(4, 'Sneha', 'Kulkarni');
+
+INSERT INTO add_dets VALUES 
+(1, 'Flat No. 5, ABC Apartments', 'MG Road', 'Maharashtra', 'Pune', '411001'),
+(2, 'Plot 23, Green Park', 'LBS Marg', 'Maharashtra', 'Mumbai', '400002'),
+(3, 'H.No. 101', 'Civil Lines', 'Madhya Pradesh', 'Indore', '452001'),
+(4, 'House No. 7', 'Sector 10', 'Gujarat', 'Ahmedabad', '380001');
+
+
+2.Retrieve the address of customer Fname as 'xyz' and Lname as 'pqr'
+
+
+SELECT c.fname, c.lname, a.add1, a.add2, a.city, a.state, a.pincode
+FROM cust_mstr c
+JOIN add_dets a ON c.cust_no = a.code_no
+WHERE c.fname = 'xyz' AND c.lname = 'pqr';
+
+ 
+3.Create View on add_dets table by selecting any two columns and perform insert update delete operations
+
+
+CREATE VIEW v_add_info AS
+SELECT code_no, city FROM add_dets;
+
+
+Perform Insert, Update, Delete on the View  
+
+
+INSERT INTO v_add_info VALUES (5, 'Nagpur');
+
+
+UPDATE v_add_info
+SET city = 'Nashik'
+WHERE code_no = 2;
+
+
+DELETE FROM v_add_info
+WHERE code_no = 4;
+
+
+b)Create following Tables
+
+     emp_mstr(e_mpno,f_name,l_name,m_name,dept,desg,branch_no)
+     branch_mstr(name,b_no)
+
+
+List the employee details along with branch names to which they belong
+
+
+CREATE TABLE
+
+CREATE TABLE branch_mstr (
+    b_no INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+CREATE TABLE emp_mstr (
+    e_mpno INT PRIMARY KEY,
+    f_name VARCHAR(50),
+    l_name VARCHAR(50),
+    m_name VARCHAR(50),
+    dept VARCHAR(50),
+    desg VARCHAR(50),
+    branch_no INT,
+    FOREIGN KEY (branch_no) REFERENCES branch_mstr(b_no)
+);
+
+
+INSERT INTO SAMPLE DATA
+
+
+INSERT INTO branch_mstr VALUES 
+(1, 'Pune Branch'),
+(2, 'Mumbai Branch'),
+(3, 'Nashik Branch');
+
+INSERT INTO emp_mstr VALUES 
+(101, 'Ravi', 'Joshi', 'S.', 'IT', 'Manager', 1),
+(102, 'Neha', 'Deshmukh', 'A.', 'HR', 'Executive', 2),
+(103, 'Kiran', 'Patil', 'B.', 'Finance', 'Analyst', 3),
+(104, 'Anita', 'Kale', 'M.', 'IT', 'Developer', 1);
+
+
+List the employee details along with branch names to which they belong
+
+
+SELECT e.e_mpno, e.f_name, e.l_name, e.m_name, e.dept, e.desg, b.name AS branch_name
+FROM emp_mstr e
+JOIN branch_mstr b ON e.branch_no = b.b_no;

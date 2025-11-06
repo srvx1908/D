@@ -1,0 +1,130 @@
+Problem statement 5.
+ 
+Q 1. Borrower(Roll_no, Name, DateofIssue, NameofBook, Status)
+         Fine(Roll_no,Date,Amt)
+    1.  Accept roll_no & name of book from user.
+    2. Check the number of days (from date of issue), if days are between 15 to 30 then fine amount will be Rs 5per day.
+    3.  If no. of days>30, per day fine will be Rs 50 per day & for days less than 30, Rs. 5 per day.
+        After submitting the book, status will change from I to R
+    4. If condition of fine is true, then details will be stored into fine table.
+    5. Also handles the exception by named exception handler or user define exception handler.
+
+
+
+
+Step 1: Create Tables
+
+
+DROP TABLE IF EXISTS Fine;
+DROP TABLE IF EXISTS Borrower;
+
+CREATE TABLE Borrower (
+  Roll_no INT NOT NULL,
+  Name VARCHAR(50),
+  DateofIssue DATE,
+  NameofBook VARCHAR(100),
+  Status CHAR(1) DEFAULT 'I',
+  PRIMARY KEY (Roll_no, NameofBook)
+);
+
+CREATE TABLE Fine (
+  FineID INT AUTO_INCREMENT PRIMARY KEY,
+  Roll_no INT,
+  FineDate DATE,
+  Amt DECIMAL(10,2),
+  FOREIGN KEY (Roll_no) REFERENCES Borrower(Roll_no)
+);
+
+
+
+Step 2: Insert Sample Data
+
+
+INSERT INTO Borrower (Roll_no, Name, DateofIssue, NameofBook, Status)
+VALUES
+(101, 'Sujit', '2025-10-01', 'DBMS', 'I'),
+(102, 'Rohan', '2025-10-20', 'C++', 'I'),
+(103, 'Priya', '2025-10-25', 'Java', 'I');
+
+
+
+
+Step 3: Create Stored Procedure
+
+
+DELIMITER $$
+
+CREATE PROCEDURE ReturnBook(
+    IN p_roll INT,
+    IN p_book VARCHAR(100)
+)
+BEGIN
+    DECLARE v_dateofissue DATE;
+    DECLARE v_days INT;
+    DECLARE v_fine DECIMAL(10,2) DEFAULT 0;
+    DECLARE v_exists INT DEFAULT 0;
+
+    -- Exception handler for record not found
+    DECLARE CONTINUE HANDLER FOR NOT FOUND
+        SET v_exists = 0;
+
+    -- Check if borrower exists
+    SELECT COUNT(*) INTO v_exists
+    FROM Borrower
+    WHERE Roll_no = p_roll AND NameofBook = p_book;
+
+    IF v_exists = 0 THEN
+        SELECT '❌ No such borrower or book found.' AS Message;
+    ELSE
+        -- Get issue date
+        SELECT DateofIssue INTO v_dateofissue
+        FROM Borrower
+        WHERE Roll_no = p_roll AND NameofBook = p_book;
+
+        -- Calculate no. of days
+        SET v_days = DATEDIFF(CURDATE(), v_dateofissue);
+
+        -- Fine calculation
+        IF v_days BETWEEN 15 AND 30 THEN
+            SET v_fine = v_days * 5;
+        ELSEIF v_days > 30 THEN
+            SET v_fine = v_days * 50;
+        ELSE
+            SET v_fine = 0;
+        END IF;
+
+        -- Update book status
+        UPDATE Borrower
+        SET Status = 'R'
+        WHERE Roll_no = p_roll AND NameofBook = p_book;
+
+        -- Insert fine if applicable
+        IF v_fine > 0 THEN
+            INSERT INTO Fine (Roll_no, FineDate, Amt)
+            VALUES (p_roll, CURDATE(), v_fine);
+        END IF;
+
+        -- Final output
+        SELECT 
+            '✅ Book Returned Successfully!' AS Message,
+            CONCAT('Days Borrowed: ', v_days) AS Days,
+            CONCAT('Fine Amount: Rs. ', v_fine) AS Fine;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+Step 4: Execute the Procedure
+
+
+CALL ReturnBook(101, 'DBMS');
+
+
+
+Step 5: Check Tables After Procedure
+
+
+SELECT * FROM Borrower;
+SELECT * FROM Fine;
